@@ -1,7 +1,6 @@
 <?php
 namespace kucha\ueditor;
 
-
 class Uploader
 {
     private $fileField; //文件域名
@@ -50,7 +49,7 @@ class Uploader
         $this->type = $type;
         if ($type == "remote") {
             $this->saveRemote();
-        } else if ($type == "base64") {
+        } elseif ($type == "base64") {
             $this->upBase64();
         } else {
             $this->upFile();
@@ -72,10 +71,10 @@ class Uploader
         if ($this->file['error']) {
             $this->stateInfo = $this->getStateInfo($file['error']);
             return;
-        } else if (!file_exists($file['tmp_name'])) {
+        } elseif (!file_exists($file['tmp_name'])) {
             $this->stateInfo = $this->getStateInfo("ERROR_TMP_FILE_NOT_FOUND");
             return;
-        } else if (!is_uploaded_file($file['tmp_name'])) {
+        } elseif (!is_uploaded_file($file['tmp_name'])) {
             $this->stateInfo = $this->getStateInfo("ERROR_TMPFILE");
             return;
         }
@@ -83,10 +82,12 @@ class Uploader
         $this->oriName = $file['name'];
         $this->fileSize = $file['size'];
         $this->fileType = $this->getFileExt();
-        $this->fullName = $this->getFullName();
+  //    $this->fullName = $this->getFullName();
         $this->filePath = $this->getFilePath();
         $this->fileName = $this->getFileName();
         $dirname = dirname($this->filePath);
+
+
 
         //检查文件大小是否超出限制
         if (!$this->checkSize()) {
@@ -100,11 +101,23 @@ class Uploader
             return;
         }
 
+
+        $ak = 'Zozp0O0TGb15K0eWag1RtFYmVg7oxVZXYXlRZg2W';
+        $sk = 'Wg5pN-Y-HOk1iUG3fPZ2v5NAPQ-KU6NLNEAzOkmB';
+        $domain = 'http://obqtcagqt.bkt.clouddn.com/';
+        $bucket = 'test';
+        $qiniu = new Qiniu($ak, $sk, $domain, $bucket);
+        $key = time();
+        $qiniu->uploadFile($file['tmp_name'], $key);
+        $url = $qiniu->getLink($key);
+        $this->stateInfo = $this->stateMap[0];
+        $this->fullName = $url;
+        /*
         //创建目录失败
         if (!file_exists($dirname) && !mkdir($dirname, 0777, true)) {
             $this->stateInfo = $this->getStateInfo("ERROR_CREATE_DIR");
             return;
-        } else if (!is_writeable($dirname)) {
+        } elseif (!is_writeable($dirname)) {
             $this->stateInfo = $this->getStateInfo("ERROR_DIR_NOT_WRITEABLE");
             return;
         }
@@ -113,7 +126,8 @@ class Uploader
             $this->stateInfo = $this->getStateInfo("ERROR_FILE_MOVE");
         } else { //移动成功
             $this->stateInfo = $this->stateMap[0];
-        }
+        }*/
+      //  return $url;
     }
 
     /**
@@ -143,7 +157,7 @@ class Uploader
         if (!file_exists($dirname) && !mkdir($dirname, 0777, true)) {
             $this->stateInfo = $this->getStateInfo("ERROR_CREATE_DIR");
             return;
-        } else if (!is_writeable($dirname)) {
+        } elseif (!is_writeable($dirname)) {
             $this->stateInfo = $this->getStateInfo("ERROR_DIR_NOT_WRITEABLE");
             return;
         }
@@ -154,7 +168,6 @@ class Uploader
         } else { //移动成功
             $this->stateInfo = $this->stateMap[0];
         }
-
     }
 
     /**
@@ -214,7 +227,7 @@ class Uploader
         if (!file_exists($dirname) && !mkdir($dirname, 0777, true)) {
             $this->stateInfo = $this->getStateInfo("ERROR_CREATE_DIR");
             return;
-        } else if (!is_writeable($dirname)) {
+        } elseif (!is_writeable($dirname)) {
             $this->stateInfo = $this->getStateInfo("ERROR_DIR_NOT_WRITEABLE");
             return;
         }
@@ -225,7 +238,6 @@ class Uploader
         } else { //移动成功
             $this->stateInfo = $this->stateMap[0];
         }
-
     }
 
     /**
@@ -318,7 +330,7 @@ class Uploader
      * 文件大小检测
      * @return bool
      */
-    private function  checkSize()
+    private function checkSize()
     {
         return $this->fileSize <= ($this->config["maxSize"]);
     }

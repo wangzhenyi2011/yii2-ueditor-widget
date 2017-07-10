@@ -34,7 +34,7 @@ class UEditorAction extends Action
 
     public function run()
     {
-        if (Yii::$app->request->get('callback',false)) {
+        if (Yii::$app->request->get('callback', false)) {
             Yii::$app->response->format = Response::FORMAT_JSONP;
         } else {
             Yii::$app->response->format = Response::FORMAT_JSON;
@@ -62,11 +62,6 @@ class UEditorAction extends Action
                 /* 上传文件 */
             case 'uploadfile':
                 $result = $this->actionUpload();
-                //处理返回的URL
-                if (substr($result['url'], 0, 1) != '/') {
-                    $result['url'] = '/' . $result['url'];
-                }
-                $result['url'] = Yii::getAlias('@web'.$result['url']);
                 break;
             /* 列出图片 */
             case 'listimage':
@@ -89,7 +84,6 @@ class UEditorAction extends Action
         /* 输出结果 */
 
         return $result;
-
     }
 
     /**
@@ -269,8 +263,12 @@ class UEditorAction extends Action
      */
     protected function getfiles($path, $allowFiles, &$files = array())
     {
-        if (!is_dir($path)) return null;
-        if (substr($path, strlen($path) - 1) != '/') $path .= '/';
+        if (!is_dir($path)) {
+            return null;
+        }
+        if (substr($path, strlen($path) - 1) != '/') {
+            $path .= '/';
+        }
         $handle = opendir($path);
         while (false !== ($file = readdir($handle))) {
             if ($file != '.' && $file != '..') {
